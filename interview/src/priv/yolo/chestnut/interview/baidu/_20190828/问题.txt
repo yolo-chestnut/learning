@@ -1,0 +1,33 @@
+一、基础部分（第1轮）
+
+重载和重写
+参考链接：https://www.runoob.com/java/java-override-overload.html
+
+重载：
+1. 两个方法仅参数列表泛型类型不一致，算不算重载？
+答：不算重载！java泛型是伪泛型，编译后泛型会被擦除为Object。
+eg：
+public void method(List<String> list) {
+    System.out.println("String");
+}
+
+public void method(List<Integer> list) {
+    System.out.println("Integer");
+}
+
+2. 两个方法仅返回值不一致，算不算重载？
+答：返还值类型不是重载的判断标准！
+eg：
+public int method1() {
+    return 1;
+}
+
+public long method1() {
+    return 1L;
+}
+
+其它问题：
+3. class是什么文件？
+4. class加载过程？new操作过程？
+5. HashMap扩容的大小是多少？为什么是2的n次方？
+参考链接：https://blog.csdn.net/sidihuo/article/details/78489820
