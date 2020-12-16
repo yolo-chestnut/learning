@@ -1,5 +1,7 @@
+local max = ARGV[1] - '0'
 if redis.call('exists', KEYS[1]) == 1 then
-    if redis.call('get', KEYS[1]) <= ARGV[1] then
+    local value = redis.call('get', KEYS[1]) - '0'
+    if value <= max then
         redis.call('incr', KEYS[1])
         redis.call('expire', KEYS[1], ARGV[2])
         return 1
