@@ -1,4 +1,5 @@
-local max = ARGV[1] - '0'
+-- local max = ARGV[1] - '0'
+local max = tonumber(ARGV[1])
 if redis.call('exists', KEYS[1]) == 1 then
     local value = redis.call('get', KEYS[1]) - '0'
     if value <= max then
