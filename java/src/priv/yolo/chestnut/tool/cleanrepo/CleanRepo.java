@@ -11,69 +11,81 @@ public class CleanRepo {
     }
 
     private static void clean(String filePath) {
-        // 是否含有子文件夹或文件
-        boolean isContainsDirectoryOrFile = false;
-        // 是否有以'.jar'结尾的文件
-        boolean haveFileEndsWithJar = false;
-        // 是否有以'.pom'结尾的文件
+        // 是否含有子文件夹
+        boolean isContainsDirectory = false;
+        // 是否有以".pom"结尾的文件
         boolean haveFileEndsWithPom = false;
+        // 是否有以".jar"结尾的文件
+        boolean haveFileEndsWithJar = false;
 
-        File file = new File(filePath);
-
-        if (file.exists()) {
-            File[] sonFiles = file.listFiles();
-
-            // 空文件夹
-            if (sonFiles == null || sonFiles.length == 0) {
-                if (file.delete()) System.out.println("删除：" + file.getAbsolutePath());
-            // 非空文件夹
+        File currentFile = new File(filePath);
+        if (currentFile.exists()) {
+            // 统计当前文件对象的下一层级对象有哪些（不包含隐藏文件）
+            File[] sonFiles = currentFile.listFiles(new HiddenFileFilter());
+            if (isEmptyFloat(sonFiles)) {
+                if (currentFile.delete())
+                    System.out.println("删除：" + currentFile.getAbsolutePath());
             } else {
-                // 遍历子文件夹或文件
-                for (File sonF : sonFiles) {
-                    // 是文件夹
-                    if (sonF.isDirectory()) {
-                        // 递归
-                        clean(sonF.getAbsolutePath());
-                        // 每一次递归结束，判断是否为空文件夹（隐藏文件不算数）
-                        File[] checkSonFiles = file.listFiles(new NotHiddenFileFilter());
-                        isContainsDirectoryOrFile = (checkSonFiles != null && checkSonFiles.length != 0);
+                for (File file : sonFiles) {
+                    if (file.isDirectory()) {
+                        clean(file.getAbsolutePath());
+                        // 每次迭代完成后统计下当前文件对象下一层级对象是否还存在文件夹
+                        File[] directories = currentFile.listFiles(new FolderFilter());
+                        isContainsDirectory = !isEmptyFloat(directories);
                     }
-                    // 是文件
-                    if (sonF.isFile()) {
-                        if (sonF.getName().endsWith(".pom")) haveFileEndsWithPom = true;
-                        if (sonF.getName().endsWith(".jar")) haveFileEndsWithJar = true;
-                        if (sonF.getName().endsWith(".lastUpdated")) {
-                            if (sonF.delete()) System.out.println("删除：" + sonF.getAbsolutePath());
+                    if (file.isFile()) {
+                        if (file.getName().endsWith(".pom")) haveFileEndsWithPom = true;
+                        if (file.getName().endsWith(".jar")) haveFileEndsWithJar = true;
+                        if (file.getName().endsWith(".lastUpdated")) {
+                            if (file.delete())
+                                System.out.println("删除：" + file.getAbsolutePath());
                         }
                     }
                 }
-                // 遍历结束，以下情况会做删除处理：
-                // 1. 空文件夹 （haveFileEndsWithJar、haveFileEndsWithPom为默认值）
-                // 2. 本文件下一层都是文件且不含有以'.jar'和'.pom'结尾的文件（isContainsDirectoryOrFile为默认值）
-                if (!isContainsDirectoryOrFile && !haveFileEndsWithJar && !haveFileEndsWithPom) {
-                    File[] delSonFiles = file.listFiles();
 
-                    if (delSonFiles != null && delSonFiles.length != 0) {
-                        for (File delSonF : delSonFiles) {
-                            if (delSonF.delete()) System.out.println("删除：" + delSonF.getAbsolutePath());
+                // 当且仅当本文件对象下一层级不包含文件夹，且不包含以.pom或者.jar结尾的文件，进入删除操作
+                if (!isContainsDirectory && !haveFileEndsWithJar && !haveFileEndsWithPom) {
+                    File[] delFiles = currentFile.listFiles();
+                    if (!isEmptyFloat(delFiles)) {
+                        for (File delSonF : delFiles) {
+                            if (delSonF.delete())
+                                System.out.println("删除：" + delSonF.getAbsolutePath());
                         }
                     }
-
-                    if (file.delete()) System.out.println("删除：" + file.getAbsolutePath());
+                    if (currentFile.delete())
+                        System.out.println("删除：" + currentFile.getAbsolutePath());
                 }
+
             }
         } else {
-            System.out.println("输入有误！");
+            System.out.println("输入的文件路径有误！");
         }
+
+    }
+
+    // 判断是否是空文件夹
+    private static boolean isEmptyFloat(File[] files) {
+        return files == null || files.length == 0;
     }
 
 }
 
-class NotHiddenFileFilter implements FileFilter {
+// 统计时候不统计隐藏文件
+class HiddenFileFilter implements FileFilter {
 
     @Override
     public boolean accept(File file) {
         return !file.isHidden();
+    }
+
+}
+
+// 仅统计文件夹
+class FolderFilter implements FileFilter {
+
+    @Override
+    public boolean accept(File file) {
+        return file.isDirectory();
     }
 
 }
