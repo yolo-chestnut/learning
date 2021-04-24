@@ -40,6 +40,10 @@ public class CleanRepo {
                             if (file.delete())
                                 System.out.println("删除：" + file.getAbsolutePath());
                         }
+                        if (file.getName().endsWith(".repositories")) {
+                            if (file.delete())
+                                System.out.println("删除：" + file.getAbsolutePath());
+                        }
                     }
                 }
 
